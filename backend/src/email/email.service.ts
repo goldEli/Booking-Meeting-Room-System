@@ -7,13 +7,16 @@ export class EmailService {
   transporter: Transporter;
 
   constructor(private configService: ConfigService) {
+    const user = this.configService.get('email_user');
+    const pass = this.configService.get('email_password');
+
     this.transporter = createTransport({
       host: 'smtp.qq.com',
       port: 587,
       secure: false,
       auth: {
-        user: this.configService.get('email_user'),
-        pass: this.configService.get('email_password'),
+        user,
+        pass,
       },
     });
   }
@@ -28,5 +31,6 @@ export class EmailService {
       subject,
       html,
     });
+    return '';
   }
 }
