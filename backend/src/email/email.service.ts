@@ -7,12 +7,14 @@ export class EmailService {
   transporter: Transporter;
 
   constructor(private configService: ConfigService) {
-    const user = this.configService.get('email_user');
-    const pass = this.configService.get('email_password');
+    const user = this.configService.get('nodemailer_auth_user');
+    const pass = this.configService.get('nodemailer_auth_pass');
+    const host = this.configService.get('nodemailer_host');
+    const port = this.configService.get('nodemailer_port');
 
     this.transporter = createTransport({
-      host: 'smtp.qq.com',
-      port: 587,
+      host,
+      port,
       secure: false,
       auth: {
         user,
@@ -22,11 +24,11 @@ export class EmailService {
   }
 
   async sendMail({ to, subject, html }) {
-    const user = this.configService.get('email_user');
+    const address = this.configService.get('nodemailer_auth_user');
     await this.transporter.sendMail({
       from: {
         name: '会议室预定系统',
-        address: user,
+        address,
       },
       to,
       subject,
