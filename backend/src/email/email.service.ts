@@ -22,10 +22,11 @@ export class EmailService {
   }
 
   async sendMail({ to, subject, html }) {
+    const user = this.configService.get('email_user');
     await this.transporter.sendMail({
       from: {
         name: '会议室预定系统',
-        address: '你的邮箱地址',
+        address: user,
       },
       to,
       subject,
