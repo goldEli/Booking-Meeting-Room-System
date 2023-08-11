@@ -1,9 +1,19 @@
-import { Controller, Post, Body, Inject, Get, Query } from '@nestjs/common';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import {
+  Controller,
+  Post,
+  Body,
+  Inject,
+  Get,
+  Query,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { EmailService } from 'src/email/email.service';
 import { RedisService } from 'src/redis/redis.service';
 import { LoginUserDto } from './dto/login-user.dto';
+import { ConfigService } from '@nestjs/config';
 // import { EmailService } from 'src/email/email.service';
 // import { RedisService } from 'src/redis/redis.service';
 
@@ -16,6 +26,12 @@ export class UserController {
 
   @Inject(RedisService)
   private redisService: RedisService;
+
+  @Inject(JwtService)
+  private jwtService: JwtService;
+
+  @Inject(ConfigService)
+  private configService: ConfigService;
 
   @Get('register-captcha')
   async captcha(@Query('address') address: string) {
@@ -44,12 +60,24 @@ export class UserController {
   @Post('login')
   async userLogin(@Body() loginUser: LoginUserDto) {
     const vo = await this.userService.login(loginUser, false);
+
     return vo;
   }
 
   @Post('admin/login')
   async adminLogin(@Body() loginUser: LoginUserDto) {
     const vo = await this.userService.login(loginUser, true);
+
     return vo;
+  }
+
+  @Get('refresh')
+  async refresh(@Query('refreshToken') refreshToken: string) {
+    return this.userService.getToken(refreshToken);
+  }
+
+  @Get('admin/refresh')
+  async adminRefresh(@Query('refreshToken') refreshToken: string) {
+    return this.userService.getToken(refreshToken);
   }
 }
