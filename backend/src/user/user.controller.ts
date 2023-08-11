@@ -43,13 +43,13 @@ export class UserController {
 
   @Post('login')
   async userLogin(@Body() loginUser: LoginUserDto) {
-    const user = await this.userService.login(loginUser, false);
-    return 'success';
+    const vo = await this.userService.login(loginUser, false);
+    return vo;
   }
 
   @Post('admin/login')
   async adminLogin(@Body() loginUser: LoginUserDto) {
-    const user = await this.userService.login(loginUser, true);
-    return 'success';
+    const vo = await this.userService.login(loginUser, true);
+    return vo;
   }
 }
