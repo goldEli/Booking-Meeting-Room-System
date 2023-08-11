@@ -16,6 +16,8 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { RequireLogin, UserInfo } from 'src/custom.decorator';
 import { UserDetailVo } from './vo/user-info.vo';
+import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 // import { EmailService } from 'src/email/email.service';
 // import { RedisService } from 'src/redis/redis.service';
 
@@ -34,6 +36,42 @@ export class UserController {
 
   @Inject(ConfigService)
   private configService: ConfigService;
+
+  @Post(['update_password', 'admin/update_password'])
+  @RequireLogin()
+  async updatePassword(
+    @UserInfo('userId') userId: number,
+    @Body() passwordDto: UpdateUserPasswordDto,
+  ) {
+    return this.userService.updatePassword(userId, passwordDto);
+  }
+
+  @Get('update_password/captcha')
+  async updatePasswordCaptcha(@Query('address') address: string) {
+    const code = Math.random().toString().slice(2, 8);
+
+    await this.redisService.set(
+      `update_password_captcha_${address}`,
+      code,
+      10 * 60,
+    );
+
+    await this.emailService.sendMail({
+      to: address,
+      subject: '更改密码验证码',
+      html: `<p>你的更改密码验证码是 ${code}</p>`,
+    });
+    return '发送成功';
+  }
+
+  @Post(['update', 'admin/update'])
+  @RequireLogin()
+  async update(
+    @UserInfo('userId') userId: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return await this.userService.update(userId, updateUserDto);
+  }
 
   @Get('register-captcha')
   async captcha(@Query('address') address: string) {
