@@ -79,6 +79,15 @@ export class UserService {
     }
   }
 
+  async findUserDetailById(userId: User['id']) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+    return user;
+  }
+
   async findUserById(userId: User['id'], isAdmin: boolean) {
     const user = await this.userRepository.findOne({
       where: {
