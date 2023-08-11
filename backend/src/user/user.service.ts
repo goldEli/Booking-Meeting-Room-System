@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { md5 } from 'src/utils';
 import { Role } from './entities/role.entity';
@@ -42,6 +42,63 @@ export class UserService {
 
   @Inject(ConfigService)
   private configService: ConfigService;
+
+  async list(options: {
+    username: string;
+    nickName: string;
+    email: string;
+    pageNo: number;
+    pageSize: number;
+  }) {
+    const { pageNo, pageSize, email, nickName, username } = options;
+    const skipCount = (pageNo - 1) * pageSize;
+
+    const condition: Record<string, any> = {};
+
+    if (username) {
+      condition.username = Like(`%${username}%`);
+    }
+    if (email) {
+      condition.email = Like(`%${email}%`);
+    }
+    if (nickName) {
+      condition.nickName = Like(`%${nickName}%`);
+    }
+
+    const [users, totalCount] = await this.userRepository.findAndCount({
+      select: [
+        'id',
+        'username',
+        'nickName',
+        'email',
+        'phoneNumber',
+        'isFrozen',
+        'headPic',
+        'createTime',
+      ],
+      skip: skipCount,
+      take: pageSize,
+      where: condition,
+    });
+    return {
+      users,
+      totalCount,
+      pageNo,
+      pageSize,
+    };
+  }
+
+  async freeze(userId: User['id']) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    user.isFrozen = !user.isFrozen;
+
+    return this.userRepository.save(user);
+  }
 
   async update(userId: number, updateUserDto: UpdateUserDto) {
     const captcha = await this.redisService.get(
