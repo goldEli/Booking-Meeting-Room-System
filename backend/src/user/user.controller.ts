@@ -88,6 +88,17 @@ export class UserController {
     return this.userService.updatePassword(userId, passwordDto);
   }
 
+  @ApiBearerAuth()
+  @ApiQuery({
+    name: 'address',
+    description: '邮箱地址',
+    type: String,
+  })
+  @ApiResponse({
+    type: String,
+    description: '发送成功',
+  })
+  @RequireLogin()
   @Get('update_password/captcha')
   async updatePasswordCaptcha(@Query('address') address: string) {
     const code = Math.random().toString().slice(2, 8);
@@ -106,6 +117,19 @@ export class UserController {
     return '发送成功';
   }
 
+  @ApiBearerAuth()
+  @ApiBody({
+    type: UpdateUserDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '验证码已失效/不正确',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '更新成功',
+    type: String,
+  })
   @Post(['update', 'admin/update'])
   @RequireLogin()
   async update(
@@ -251,11 +275,53 @@ export class UserController {
     return this.userService.getToken(refreshToken);
   }
 
+  @ApiBearerAuth()
+  @ApiQuery({
+    name: 'id',
+    description: 'userId',
+    type: Number,
+  })
+  @ApiResponse({
+    type: String,
+    description: 'success',
+  })
+  @RequireLogin()
   @Get('freeze')
   async freeze(@Query('id') userId: User['id']) {
     return this.userService.freeze(userId);
   }
 
+  @ApiBearerAuth()
+  @ApiQuery({
+    name: 'pageNo',
+    description: '第几页',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    description: '每页多少条',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'username',
+    description: '用户名',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'nickName',
+    description: '昵称',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'email',
+    description: '邮箱地址',
+    type: Number,
+  })
+  @ApiResponse({
+    type: String,
+    description: '用户列表',
+  })
+  @RequireLogin()
   @Get('list')
   async list(
     @Query('pageNo', new DefaultValuePipe(1), generateParseIntPipe('pageNo'))

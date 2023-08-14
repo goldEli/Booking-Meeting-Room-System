@@ -21,6 +21,7 @@ import { ConfigService } from '@nestjs/config';
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RefreshTokenVo } from './vo/refresh-token.vo';
+import { UserListVo } from './vo/user-list.vo';
 
 @Injectable()
 export class UserService {
@@ -81,12 +82,12 @@ export class UserService {
       take: pageSize,
       where: condition,
     });
-    return {
-      users,
-      totalCount,
-      pageNo,
-      pageSize,
-    };
+    const vo = new UserListVo();
+    vo.users = users;
+    vo.totalCount = totalCount;
+    vo.pageNo = pageNo;
+    vo.pageSize = pageSize;
+    return vo;
   }
 
   async freeze(userId: User['id']) {
