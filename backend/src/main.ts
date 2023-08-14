@@ -16,6 +16,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new InvokeRecordInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
   // app.useGlobalFilters(new UnloginFilter());
+  // 支持跨域
+  app.enableCors();
 
   const config = new DocumentBuilder()
     .setTitle('会议室预定系统')
